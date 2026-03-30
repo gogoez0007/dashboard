@@ -3,125 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Tambak Vercel</title>
+    <title>Dashboard Tambak - GitHub Live</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 min-h-screen p-4">
+<body class="bg-slate-50 min-h-screen p-4 font-sans text-slate-900">
 
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-t-4 border-blue-600">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-xl font-black text-slate-800 tracking-tight uppercase">📊 Monitoring Tambak (Vercel Live)</h1>
-                <div id="statusLoad" class="text-[10px] font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-600 tracking-wider uppercase">
-                    Initializing...
+        <!-- Dashboard Header -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M0 13a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 16 13V6a1.5 1.5 0 0 0-1.5-1.5h-13A1.5 1.5 0 0 0 0 6v7zM2 3a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 0-1h-11A.5.5 0 0 0 2 3zm2-2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 0-1h-7A.5.5 0 0 0 4 1z"/></svg>
+                    </div>
+                    <h1 class="text-xl font-black uppercase tracking-tighter">Monitoring Kualitas Air</h1>
+                </div>
+                <div id="fileStatus" class="text-[10px] font-bold px-4 py-1.5 rounded-full bg-slate-100 text-slate-400 uppercase tracking-widest animate-pulse">
+                    Mencoba memuat Book1.xlsx...
                 </div>
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-50 p-2 border rounded-lg">
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Ganti File Excel</label>
-                    <input type="file" id="uploadFile" accept=".xlsx, .xls" class="text-xs w-full">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Pilih Siklus Utama</label>
+                    <select id="siklusFilter" class="w-full p-3 bg-slate-50 border-0 rounded-xl font-bold text-blue-700 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"></select>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 font-sans">Pilih Siklus</label>
-                    <select id="siklusFilter" class="w-full p-2 border border-slate-300 rounded-md font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none"></select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1 font-sans">Pilih Parameter</label>
-                    <select id="paramFilter" class="w-full p-2 border border-slate-300 rounded-md font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 outline-none">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase text-slate-400 ml-1">Pilih Parameter Analisa</label>
+                    <select id="paramFilter" class="w-full p-3 bg-slate-50 border-0 rounded-xl font-bold text-slate-700 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer">
                         <option value="PH.1">PH.1</option>
                         <option value="SAL">SAL (Salinitas)</option>
-                        <option value="NO2">NO2</option>
+                        <option value="NO2">NO2 (Nitrit)</option>
                         <option value="ALK">ALK (Alkalinitas)</option>
                         <option value="TOM">TOM</option>
                         <option value="MG">MG (Magnesium)</option>
-                        <option value="CA">CA (Calsium)</option>
+                        <option value="CA">CA (Kalsium)</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Dashboard Content -->
-        <div id="dashboardArea" class="hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Timeline -->
-                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200">
-                    <h2 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">📈 Timeline Pergerakan Harian</h2>
-                    <div class="h-[450px]"><canvas id="lineChart"></canvas></div>
+        <!-- Main Dashboard Area -->
+        <div id="dashboardContainer" class="hidden space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Timeline Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">📈 Timeline Pergerakan Harian</h2>
+                    <div class="h-[450px]">
+                        <canvas id="lineChart"></canvas>
+                    </div>
                 </div>
-                <!-- Bar Chart -->
-                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-200 text-center">
-                    <h2 class="text-md font-bold text-slate-800 mb-4 border-b pb-2">⚖️ Rata-rata Per Siklus</h2>
-                    <div class="h-[450px]"><canvas id="barChartSiklus"></canvas></div>
+
+                <!-- Cycle Bar Chart -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 text-center">📊 Perbandingan Rata-rata Siklus</h2>
+                    <div class="h-[450px]">
+                        <canvas id="barChartSiklus"></canvas>
+                    </div>
                 </div>
             </div>
 
-            <!-- Summary Tables -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-                <div class="bg-white p-5 rounded-xl shadow border border-slate-200">
-                    <h3 class="font-bold mb-3 text-blue-600 uppercase text-xs">Summary Pond (Siklus Terpilih)</h3>
-                    <div id="tablePondWrap" class="overflow-auto max-h-[400px]"></div>
+            <!-- Tables Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-20">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-blue-600 uppercase tracking-widest mb-4">Ringkasan Pond (Siklus Terpilih)</h3>
+                    <div id="tablePond" class="overflow-x-auto"></div>
                 </div>
-                <div class="bg-white p-5 rounded-xl shadow border border-slate-200 text-center">
-                    <h3 class="font-bold mb-3 text-slate-700 uppercase text-xs">Perbandingan Antar Siklus</h3>
-                    <div id="tableSiklusWrap" class="overflow-auto max-h-[400px]"></div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest mb-4 text-center">Rekap Perbandingan Antar Siklus</h3>
+                    <div id="tableSiklus" class="overflow-x-auto"></div>
                 </div>
             </div>
         </div>
 
-        <div id="emptyState" class="py-40 text-center bg-white rounded-xl border-2 border-dashed border-slate-200 hidden">
-            <p class="text-slate-400">File default tidak ditemukan. Silakan upload manual.</p>
+        <!-- Fallback Message -->
+        <div id="errorArea" class="hidden py-40 text-center bg-white rounded-2xl border-2 border-dashed border-slate-200">
+            <p class="text-slate-400 font-medium italic">Book1.xlsx tidak terbaca atau tidak ada di folder GitHub ini.</p>
         </div>
     </div>
 
     <script>
+        // Registrasi Labelist
         Chart.register(ChartDataLabels);
+
         let rawData = [];
         let lineChart, barChartSiklus;
 
-        // LOAD OTOMATIS DARI VERCEL SERVER
-        window.addEventListener('DOMContentLoaded', () => {
-            fetch('./Book1.xlsx')
-                .then(res => {
-                    if(!res.ok) throw new Error("File not found");
-                    return res.arrayBuffer();
-                })
-                .then(buf => {
-                    processData(buf);
-                    document.getElementById('statusLoad').innerText = "Book1.xlsx Loaded";
-                    document.getElementById('statusLoad').className = "text-[10px] font-bold px-3 py-1 rounded-full bg-green-100 text-green-600";
-                })
-                .catch(err => {
-                    console.error(err);
-                    document.getElementById('statusLoad').innerText = "Gagal Load Default";
-                    document.getElementById('statusLoad').className = "text-[10px] font-bold px-3 py-1 rounded-full bg-red-100 text-red-600";
-                    document.getElementById('emptyState').classList.remove('hidden');
-                });
-        });
+        // AUTO LOAD Book1.xlsx DARI GITHUB/VERCEL
+        window.onload = async () => {
+            const status = document.getElementById('fileStatus');
+            try {
+                // Pastikan nama file di GitHub persis: Book1.xlsx
+                const res = await fetch('./Book1.xlsx'); 
+                if (!res.ok) throw new Error("File Missing");
+                
+                const buf = await res.arrayBuffer();
+                processWorkbook(buf);
 
-        document.getElementById('uploadFile').addEventListener('change', (e) => {
-            const reader = new FileReader();
-            reader.onload = (ev) => processData(ev.target.result);
-            reader.readAsArrayBuffer(e.target.files[0]);
-        });
+                status.innerText = "Data Terhubung (GitHub Live)";
+                status.className = "text-[10px] font-bold px-4 py-1.5 rounded-full bg-green-100 text-green-600 uppercase tracking-widest";
+                status.classList.remove('animate-pulse');
+            } catch (e) {
+                console.error("Fetch Error:", e);
+                status.innerText = "Book1.xlsx Tidak Ditemukan";
+                status.className = "text-[10px] font-bold px-4 py-1.5 rounded-full bg-red-100 text-red-600 uppercase tracking-widest";
+                document.getElementById('errorArea').classList.remove('hidden');
+            }
+        };
 
-        document.getElementById('siklusFilter').addEventListener('change', updateUI);
-        document.getElementById('paramFilter').addEventListener('change', updateUI);
+        document.getElementById('siklusFilter').onchange = updateView;
+        document.getElementById('paramFilter').onchange = updateView;
 
-        function processData(buffer) {
+        function processWorkbook(buffer) {
             const wb = XLSX.read(new Uint8Array(buffer), { type: 'array', cellDates: true });
             const data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             
+            // Pembersihan Data & Normalisasi Nama Kolom
             rawData = data.map(r => {
                 let obj = {};
                 for (let k in r) {
                     let key = k.trim().toUpperCase();
                     let val = r[k];
-                    if (typeof val === 'string' && !isNaN(parseFloat(val.replace(',', '.')))) val = parseFloat(val.replace(',', '.'));
+                    // Atasi koma desimal Indonesia (,) jadi (.)
+                    if (typeof val === 'string' && !isNaN(parseFloat(val.replace(',', '.')))) {
+                        val = parseFloat(val.replace(',', '.'));
+                    }
                     obj[key] = val;
                 }
                 return obj;
@@ -130,30 +139,30 @@
             if (rawData.length > 0) {
                 const uniqueS = [...new Set(rawData.map(d => d.SIKLUS))].filter(Boolean);
                 document.getElementById('siklusFilter').innerHTML = uniqueS.map(s => `<option value="${s}">${s}</option>`).join('');
-                document.getElementById('dashboardArea').classList.remove('hidden');
-                document.getElementById('emptyState').classList.add('hidden');
-                updateUI();
+                document.getElementById('dashboardContainer').classList.remove('hidden');
+                updateView();
             }
         }
 
-        function updateUI() {
+        function updateView() {
             const selSiklus = document.getElementById('siklusFilter').value;
             const selParam = document.getElementById('paramFilter').value.toUpperCase();
 
             const filtered = rawData.filter(d => String(d.SIKLUS) === selSiklus);
             const ponds = [...new Set(filtered.map(d => d.POND))];
 
-            // LINE CHART
+            // 1. TIMELINE LINE CHART (Sumbu Y Lega + Labelist)
             const ds = ponds.map((p, i) => {
-                const rows = filtered.filter(r => r.POND === p).sort((a,b) => new Date(a.DATE) - new Date(b.DATE));
+                const pData = filtered.filter(r => r.POND === p).sort((a,b) => new Date(a.DATE) - new Date(b.DATE));
                 const colors = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
                 return {
                     label: `Pond ${p}`,
-                    data: rows.map(r => ({ x: formatTgl(r.DATE), y: r[selParam] })),
+                    data: pData.map(r => ({ x: formatTgl(r.DATE), y: r[selParam] })),
                     borderColor: colors[i % colors.length],
                     backgroundColor: colors[i % colors.length],
-                    tension: 0.1,
-                    pointRadius: 5
+                    tension: 0.15,
+                    pointRadius: 5,
+                    pointHoverRadius: 8
                 };
             });
 
@@ -165,13 +174,23 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        datalabels: { display: true, align: 'top', offset: 8, font: { weight: 'bold', size: 10 }, formatter: (v) => v.y || "" }
+                        legend: { position: 'bottom', labels: { boxWidth: 10, padding: 20 } },
+                        datalabels: {
+                            display: true,
+                            align: 'top',
+                            offset: 10,
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (v) => v.y || ""
+                        }
                     },
-                    scales: { x: { offset: true }, y: { grace: '25%', beginAtZero: false } }
+                    scales: {
+                        x: { offset: true, grid: { display: false } },
+                        y: { grace: '30%', beginAtZero: false } // 30% Space di atas sumbu Y
+                    }
                 }
             });
 
-            // BAR CHART
+            // 2. BAR CHART (Siklus Comparison)
             const allS = [...new Set(rawData.map(d => d.SIKLUS))].filter(Boolean);
             const avgs = allS.map(s => {
                 const r = rawData.filter(d => d.SIKLUS === s);
@@ -183,50 +202,57 @@
                 type: 'bar',
                 data: {
                     labels: allS,
-                    datasets: [{ label: `Avg ${selParam}`, data: avgs, backgroundColor: allS.map(s => s === selSiklus ? '#2563eb' : '#cbd5e1') }]
+                    datasets: [{
+                        label: `Avg ${selParam}`,
+                        data: avgs,
+                        backgroundColor: allS.map(s => s === selSiklus ? '#2563eb' : '#e2e8f0'),
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { datalabels: { display: true, anchor: 'end', align: 'top' } },
+                    plugins: {
+                        datalabels: { anchor: 'end', align: 'top' }
+                    },
                     scales: { y: { grace: '15%' } }
                 }
             });
 
-            renderTables(filtered, selSiklus);
+            drawTables(filtered, selSiklus);
         }
 
-        function renderTables(filtered, activeS) {
+        function drawTables(filtered, activeS) {
             const cols = ['PH.1', 'SAL', 'ALK', 'TOM', 'MG', 'CA'];
             
-            // Pond Summary
-            let pBody = [...new Set(filtered.map(d => d.POND))].map(p => {
+            // Pond Table
+            let pRows = [...new Set(filtered.map(d => d.POND))].map(p => {
                 const r = filtered.filter(row => row.POND === p);
-                let row = `<td class="p-2 border font-bold text-slate-800 text-left">${p}</td>`;
+                let cells = `<td class="p-3 border font-bold text-slate-800">${p}</td>`;
                 cols.forEach(c => {
                     const v = r.reduce((a, b) => a + (parseFloat(b[c]) || 0), 0) / r.length;
-                    row += `<td class="p-2 border text-center font-mono">${v.toFixed(2)}</td>`;
+                    cells += `<td class="p-3 border text-center font-mono">${v.toFixed(2)}</td>`;
                 });
-                return `<tr>${row}</tr>`;
+                return `<tr>${cells}</tr>`;
             }).join('');
-            document.getElementById('tablePondWrap').innerHTML = `<table class="w-full text-[11px] border">
-                <thead class="bg-slate-50"><tr><th class="p-2 border text-left">POND</th>${cols.map(c=>`<th class="p-2 border">${c}</th>`).join('')}</tr></thead>
-                <tbody>${pBody}</tbody></table>`;
+            document.getElementById('tablePond').innerHTML = `<table class="w-full text-[11px] text-left border-collapse border border-slate-100">
+                <thead class="bg-slate-50 text-slate-400"><tr><th class="p-3 border font-bold uppercase">Pond</th>${cols.map(c=>`<th class="p-3 border font-bold text-center">${c}</th>`).join('')}</tr></thead>
+                <tbody>${pRows}</tbody></table>`;
 
-            // Cycle Comparison
+            // Comparison Table
             const allS = [...new Set(rawData.map(d => d.SIKLUS))].filter(Boolean);
-            let sBody = allS.map(s => {
+            let sRows = allS.map(s => {
                 const r = rawData.filter(row => row.SIKLUS === s);
-                let row = `<td class="p-2 border text-left">${s}</td>`;
+                let cells = `<td class="p-3 border">${s}</td>`;
                 cols.forEach(c => {
                     const v = r.reduce((a, b) => a + (parseFloat(b[c]) || 0), 0) / r.length;
-                    row += `<td class="p-2 border text-center font-mono">${v.toFixed(2)}</td>`;
+                    cells += `<td class="p-3 border text-center font-mono">${v.toFixed(2)}</td>`;
                 });
-                return `<tr class="${s === activeS ? 'bg-blue-50 font-black' : ''}">${row}</tr>`;
+                return `<tr class="${s === activeS ? 'bg-blue-50 font-black' : ''}">${cells}</tr>`;
             }).join('');
-            document.getElementById('tableSiklusWrap').innerHTML = `<table class="w-full text-[11px] border">
-                <thead class="bg-slate-800 text-white"><tr><th class="p-2 border text-left">SIKLUS</th>${cols.map(c=>`<th class="p-2 border">${c} (AVG)</th>`).join('')}</tr></thead>
-                <tbody>${sBody}</tbody></table>`;
+            document.getElementById('tableSiklus').innerHTML = `<table class="w-full text-[11px] text-left border-collapse border border-slate-100">
+                <thead class="bg-slate-800 text-white"><tr><th class="p-3 border uppercase font-bold tracking-widest">Siklus</th>${cols.map(c=>`<th class="p-3 border font-bold text-center">${c} (Avg)</th>`).join('')}</tr></thead>
+                <tbody>${sRows}</tbody></table>`;
         }
 
         function formatTgl(val) {
